@@ -1,88 +1,116 @@
 import { useState } from 'react'
-/*eslint-disable */
+import './styles/App.css'
+
 //223687902
 // Минхо - Банчан - Феликс - Хёнджин - Джисон - Чонин - Сынмин - Чанбина на https://vk.com/jelacrois
-// vk1.a.q2TyECCngz45Rze7Fd8EpAtOSBbBaFuE5HfkBZHvU9bYr0l1N3dElNK_pzI1MvBYD_z0V4-kIdV0Vy3Vt6K9ELzJrXPyljh4zxfjSSgVaGiq3j9rP05TwixUC62YSF6O7AyJeXcyYHoYoRuTAETYx-5uMPXVHI2qrA2rNmnEm87XZht38dplKLjBDlwbbRTT_tASeKo0deTIPww1-Niobg
+// vk1.a.zpxFCkiOU8VPXOM6G179LhksGIngl5FcMRZJtwOxFz7oGSJoVOlxbOcmh1aCu6BNWBQhMBduNKJBNWfCNMTS39CDi4_qoMZvJJ9ySwdXn546XMEiA6MuqITG-Sx-bWPLtwl4Lad7WBTBeIqpOPXyr0KoGEkLt2ZVlaHVwUGsvDP_WCu0eqLMk3hRwI3SDm6-D6cihfK4C1gdul6a5LQBBA
 function App() {
 	const [accessToken, setAccessToken] = useState('')
 	const [message, setMessage] = useState('')
 	const [groupID, setGroupID] = useState('')
 	const [isWorking, setIsWorking] = useState('')
+	const [loopState, setLoopState] = useState(true)
+
+	let groupPostLast = []
+	let lastPostTime = 0
+	let lastPostId = 0
+	let groupPostCurrent = []
+	let currentPostTime = 0
+	let currentPostId = 0
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		let groupPostLast = await VK.Api.call(
+		await VK.Api.call(
 			'wall.get',
 			{
 				owner_id: `-${groupID}`,
 				access_token: `${accessToken}`,
-				v: '5.131',
+				count: 1,
+				v: '5.199',
 			},
 			(r) => {
 				try {
-					return r
+					groupPostLast = groupPostLast.concat(r.response.items)
+					lastPostTime = groupPostLast[0].date
+					lastPostId = groupPostLast[0].id
 				} catch (e) {
 					console.log(e)
 				}
 			}
 		)
-		console.log(groupPostLast)
-		let lastPostTime = groupPostLast.items[0].date
-		let lastPostId = groupPostLast.items[0].id
-		const intervalId = setInterval(async () => {
+		while (loopState) {
 			try {
-				console.log('reload')
-				// let groupPostCurrent = await axios.get(
-				// 	`https://api.vk.com/method/wall.get?owner_id=-${groupID}&v=5.131&access_token=${accessToken}`
-				// )
-				let groupPostCurrent = await VK.Api.call('wall.get', {
-					owner_id: `-${groupID}`,
-					access_token: `${accessToken}`,
-					v: '5.131',
-				})
-				let currentPostTime = groupPostCurrent.items[0].date
-				let currentPostId = groupPostCurrent.items[0].id
-				if (lastPostTime !== currentPostTime) {
-					print(currentPostTime)
-					// await axios.post(
-					// 	`https://api.vk.com/method/wall.createComment?owner_id=-${groupID}&post_id=${currentPostId}&message=${message}&v=5.131&access_token=${accessToken}`
-					// )
-
-					await VK.Api.call('wall.createComment', {
+				await VK.Api.call(
+					'wall.get',
+					{
 						owner_id: `-${groupID}`,
-						post_id: `${currentPostId}`,
-						message: `${message}`,
 						access_token: `${accessToken}`,
-						v: '5.131',
-					})
-					lastPostTime = currentPostTime
-					lastPostId = currentPostId
-					clearInterval(intervalId)
+						count: 1,
+						v: '5.199',
+					},
+					(r) => {
+						try {
+							groupPostCurrent = r.response.items
+							currentPostTime = groupPostCurrent[0].date
+							currentPostId = groupPostCurrent[0].id
+						} catch (e) {
+							console.log(e)
+						}
+					}
+				)
+				await console.log(currentPostTime, lastPostTime)
+				await console.log(currentPostId, lastPostId)
+
+				if (lastPostTime !== currentPostTime) {
+					await VK.Api.call(
+						'wall.createComment',
+						{
+							access_token: `${accessToken}`,
+							owner_id: `-${groupID}`,
+							post_id: `${currentPostId}`,
+							message: `${message}`,
+							v: '5.199',
+							client_id: 51808492,
+							client_secret: 'jufET4tvDsxU48PVu0q5',
+							scope: 'wall',
+						},
+						(r) => {
+							try {
+								console.log(r)
+							} catch (e) {
+								console.log(e)
+							}
+						}
+					)
+					setLoopState((prev) => !prev)
+					console.log('com')
 				}
+				await new Promise((r) => setTimeout(r, 1000))
 			} catch (error) {
 				console.error('Error:', error)
 			}
-		}, 1000)
+		}
 	}
 
 	return (
 		<>
+			<h1>Ну типа как то так</h1>
 			<form onSubmit={handleSubmit}>
 				<input
 					type='text'
-					placeholder='Access Token'
+					placeholder='Токен доступа'
 					value={accessToken}
 					onChange={(e) => setAccessToken(e.target.value)}
 				/>
 				<input
 					type='text'
-					placeholder='Message'
+					placeholder='Комментарий'
 					value={message}
 					onChange={(e) => setMessage(e.target.value)}
 				/>
 				<input
 					type='text'
-					placeholder='groupID'
+					placeholder='ID группы'
 					value={groupID}
 					onChange={(e) => setGroupID(e.target.value)}
 				/>
