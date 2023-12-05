@@ -3,7 +3,7 @@ import './styles/App.css'
 
 //223687902
 // Минхо - Банчан - Феликс - Хёнджин - Джисон - Чонин - Сынмин - Чанбина на https://vk.com/jelacrois
-// vk1.a.zpxFCkiOU8VPXOM6G179LhksGIngl5FcMRZJtwOxFz7oGSJoVOlxbOcmh1aCu6BNWBQhMBduNKJBNWfCNMTS39CDi4_qoMZvJJ9ySwdXn546XMEiA6MuqITG-Sx-bWPLtwl4Lad7WBTBeIqpOPXyr0KoGEkLt2ZVlaHVwUGsvDP_WCu0eqLMk3hRwI3SDm6-D6cihfK4C1gdul6a5LQBBA
+
 function App() {
 	const [accessToken, setAccessToken] = useState('')
 	const [message, setMessage] = useState('')
@@ -20,6 +20,7 @@ function App() {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
+		// eslint-disable-next-line no-undef
 		await VK.Api.call(
 			'wall.get',
 			{
@@ -40,6 +41,7 @@ function App() {
 		)
 		while (loopState) {
 			try {
+				// eslint-disable-next-line no-undef
 				await VK.Api.call(
 					'wall.get',
 					{
@@ -62,6 +64,7 @@ function App() {
 				await console.log(currentPostId, lastPostId)
 
 				if (lastPostTime !== currentPostTime) {
+					// eslint-disable-next-line no-undef
 					await VK.Api.call(
 						'wall.createComment',
 						{
