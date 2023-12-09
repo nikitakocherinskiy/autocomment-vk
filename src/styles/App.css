@@ -1,56 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Nunito&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Nunito&display=swap");
 
 * {
-	font-family: 'Comfortaa', sans-serif;
-	text-align: center;
+  font-family: "Comfortaa", sans-serif;
+  text-align: center;
 }
 
 h1 {
-	padding-top: 30vh;
-	color: white;
+  padding-top: 30vh;
+  color: white;
+}
+
+span {
+  color: #fff;
 }
 
 form {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  padding-top: 20px;
 }
 
 input {
-	background-color: #f3f3f3;
-	border: 2px solid #d3d3d3;
-	border-radius: 5px;
-	padding: 10px;
-	margin: 5px;
-	transition: all 0.3s ease;
+  background-color: #f3f3f3;
+  border: 2px solid #d3d3d3;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 5px;
+  transition: all 0.3s ease;
 }
 
 input:hover {
-	border-color: #b3b3b3;
+  border-color: #b3b3b3;
 }
 
 button {
-	background-color: #f3f3f3;
-	border: 2px solid #d3d3d3;
-	padding: 10px 20px;
-	margin: 10px;
-	border-radius: 5px;
-	cursor: pointer;
-	transition: all 0.3s ease;
+  background-color: #f3f3f3;
+  border: 2px solid #d3d3d3;
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-	background-color: #e0e0e0;
-	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  background-color: #e0e0e0;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
 input:focus,
 button:focus {
-	outline: none;
+  outline: none;
 }
 
 @media (max-width: 700px) {
-	form {
-		flex-direction: column;
-	}
+  form {
+    flex-direction: column;
+  }
 }

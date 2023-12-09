@@ -1,126 +1,148 @@
-import { useState } from 'react'
-import './styles/App.css'
-
-//223687902
-// Минхо - Банчан - Феликс - Хёнджин - Джисон - Чонин - Сынмин - Чанбина на https://vk.com/jelacrois
+/* eslint-disable no-undef */
+import { useState } from "react"
+import "./styles/App.css"
+import { MutatingDots } from "react-loader-spinner"
 
 function App() {
-	const [accessToken, setAccessToken] = useState('')
-	const [message, setMessage] = useState('')
-	const [groupID, setGroupID] = useState('')
-	const [isWorking, setIsWorking] = useState('')
-	const [loopState, setLoopState] = useState(true)
+  const [accessToken, setAccessToken] = useState("")
+  const [message, setMessage] = useState("")
+  const [groupID, setGroupID] = useState("")
+  const [isWorking, setIsWorking] = useState(true)
+  const [groupPostLast, setGroupPostLast] = useState({})
+  const [lastPostTime, setLastPostTime] = useState(0)
+  const [lastPostId, setLastPostId] = useState(0)
+  const [groupPostCurrent, setGroupPostCurrent] = useState({})
+  const [currentPostTime, setCurrentPostTime] = useState(0)
+  const [currentPostId, setCurrentPostId] = useState(0)
+  const [clickState, setClickState] = useState(false)
+  // const [change, setChange] = useState(true)
+  let change = true
 
-	let groupPostLast = []
-	let lastPostTime = 0
-	let lastPostId = 0
-	let groupPostCurrent = []
-	let currentPostTime = 0
-	let currentPostId = 0
+  const commentPost = async (postId) => {
+    await VK.Api.call(
+      "wall.createComment",
+      {
+        access_token: `${accessToken}`,
+        owner_id: `-${groupID}`,
+        post_id: `${postId}`,
+        message: `${message}`,
+        v: "5.199",
+        client_id: 51808492,
+        client_secret: "jufET4tvDsxU48PVu0q5",
+        scope: "wall",
+      },
+      (r) => {
+        try {
+          console.log("comment success")
+          console.log(r)
+        } catch (e) {
+          console.log(e)
+        }
+      }
+    )
+  }
 
-	const handleSubmit = async (e) => {
-		e.preventDefault()
-		// eslint-disable-next-line no-undef
-		await VK.Api.call(
-			'wall.get',
-			{
-				owner_id: `-${groupID}`,
-				access_token: `${accessToken}`,
-				count: 1,
-				v: '5.199',
-			},
-			(r) => {
-				try {
-					groupPostLast = groupPostLast.concat(r.response.items)
-					lastPostTime = groupPostLast[0].date
-					lastPostId = groupPostLast[0].id
-				} catch (e) {
-					console.log(e)
-				}
-			}
-		)
-		while (loopState) {
-			try {
-				// eslint-disable-next-line no-undef
-				await VK.Api.call(
-					'wall.get',
-					{
-						owner_id: `-${groupID}`,
-						access_token: `${accessToken}`,
-						count: 1,
-						v: '5.199',
-					},
-					(r) => {
-						try {
-							groupPostCurrent = r.response.items
-							currentPostTime = groupPostCurrent[0].date
-							currentPostId = groupPostCurrent[0].id
-						} catch (e) {
-							console.log(e)
-						}
-					}
-				)
-				await console.log(currentPostTime, lastPostTime)
-				await console.log(currentPostId, lastPostId)
+  const getLastPost = async () => {
+    await VK.Api.call(
+      "wall.get",
+      {
+        owner_id: parseInt(`-${groupID}`),
+        access_token: `${accessToken}`,
+        count: 1,
+        v: "5.199",
+      },
+      (r) => {
+        setGroupPostLast(r.response.items[0])
+        setLastPostTime(r.response.items[0].date)
+        setLastPostId(r.response.items[0].id)
+        console.log("Last post ID:", r.response.items[0])
+        console.log(lastPostId, currentPostId)
+      }
+    )
+  }
 
-				if (lastPostTime !== currentPostTime) {
-					// eslint-disable-next-line no-undef
-					await VK.Api.call(
-						'wall.createComment',
-						{
-							access_token: `${accessToken}`,
-							owner_id: `-${groupID}`,
-							post_id: `${currentPostId}`,
-							message: `${message}`,
-							v: '5.199',
-							client_id: 51808492,
-							client_secret: 'jufET4tvDsxU48PVu0q5',
-							scope: 'wall',
-						},
-						(r) => {
-							try {
-								console.log(r)
-							} catch (e) {
-								console.log(e)
-							}
-						}
-					)
-					setLoopState((prev) => !prev)
-					console.log('com')
-				}
-				await new Promise((r) => setTimeout(r, 1000))
-			} catch (error) {
-				console.error('Error:', error)
-			}
-		}
-	}
+  const handleClick = async () => {
+    setClickState(true)
+    while (change) {
+      await VK.Api.call(
+        "wall.get",
+        {
+          owner_id: parseInt(`-${groupID}`),
+          access_token: `${accessToken}`,
+          count: 1,
+          v: "5.199",
+        },
+        (r) => {
+          console.log(r)
+          setGroupPostCurrent(r.response.items[0])
+          console.log("Current post ID:", r.response.items[0])
+          console.log(lastPostId, r.response.items[0].id)
+          if (
+            lastPostTime !== r.response.items[0].date &&
+            r.response.items[0].date !== 0
+          ) {
+            console.log("condition")
+            commentPost(r.response.items[0].id)
+            setLastPostTime(r.response.items[0].date)
+            setLastPostId(r.response.items[0].id)
+            change = false
+            // clearInterval(intervalId)
+            //@ts-ignore
+          }
+        }
+      )
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+    }
+  }
 
-	return (
-		<>
-			<h1>Ну типа как то так</h1>
-			<form onSubmit={handleSubmit}>
-				<input
-					type='text'
-					placeholder='Токен доступа'
-					value={accessToken}
-					onChange={(e) => setAccessToken(e.target.value)}
-				/>
-				<input
-					type='text'
-					placeholder='Комментарий'
-					value={message}
-					onChange={(e) => setMessage(e.target.value)}
-				/>
-				<input
-					type='text'
-					placeholder='ID группы'
-					value={groupID}
-					onChange={(e) => setGroupID(e.target.value)}
-				/>
-				<button type='submit'>Начать</button>
-			</form>
-		</>
-	)
+  return (
+    <>
+      <h1>Ну типа как то так</h1>
+      <span>ID последнего поста: {lastPostId}</span>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <input
+            type='text'
+            placeholder='Токен доступа'
+            value={accessToken}
+            onChange={(e) => setAccessToken(e.target.value)}
+          />
+          <input
+            type='text'
+            placeholder='ID группы'
+            value={groupID}
+            onChange={(e) => setGroupID(e.target.value)}
+          />
+          <button onClick={getLastPost}>Получить пост</button>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <input
+            type='text'
+            placeholder='Комментарий'
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <button onClick={handleClick}>Начать</button>
+        </div>
+        {change && clickState && (
+          <div>
+            <span>Работает</span>
+            <MutatingDots
+              height='100'
+              width='100'
+              color='#4fa94d'
+              secondaryColor='#4fa94d'
+              radius='10.5'
+              ariaLabel='mutating-dots-loading'
+              wrapperStyle={{}}
+              wrapperClass=''
+              visible={true}
+            />
+          </div>
+        )}
+      </form>
+    </>
+  )
 }
 
 export default App
